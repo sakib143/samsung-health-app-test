@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">samsung-health-test</string>
+    <string name="health_permission_need">Peermission Needed</string>
+    <string name="ok">Ok</string>
+    <string name="msg_req_install">Install App</string>
+    <string name="msg_req_upgrade">upgrade</string>
+    <string name="msg_req_enable">enable</string>
+    <string name="msg_req_agree">Agree</string>
+    <string name="msg_req_available">Available</string>
+</resources>
