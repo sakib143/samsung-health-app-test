@@ -8,8 +8,12 @@ import android.util.Log;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.samsung_health_test.AppUtils.GlobalMethods;
+import com.example.samsung_health_test.samsung_health.NewData.DrinkWaterReport;
+import com.example.samsung_health_test.samsung_health.NewData.SleeepReportNew;
 import com.example.samsung_health_test.samsung_health.SleepReporter;
+import com.example.samsung_health_test.samsung_health.NewData.StepCountReportNew;
 import com.example.samsung_health_test.samsung_health.StepCountReporter;
+import com.example.samsung_health_test.samsung_health.NewData.SwimmingReportNew;
 import com.example.samsung_health_test.samsung_health.SwimmingReporter;
 import com.example.samsung_health_test.samsung_health.WaterDrinkReport;
 import com.samsung.android.sdk.healthdata.HealthConnectionErrorResult;
@@ -32,19 +36,19 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: 20-11-2019 Samsung Health App Related stuff by Sakib START
     public static final HealthPermissionManager.PermissionKey STEP_DAILY_TREND_READ_PERMISSION = new HealthPermissionManager.PermissionKey(
-            "com.samsung.shealth.step_daily_trend", HealthPermissionManager.PermissionType.READ);
+            HealthConstants.StepCount.HEALTH_DATA_TYPE, HealthPermissionManager.PermissionType.READ);
 
     public static final HealthPermissionManager.PermissionKey EXERCISE_READ_PERMISSION = new HealthPermissionManager.PermissionKey(
             HealthConstants.Exercise.HEALTH_DATA_TYPE, HealthPermissionManager.PermissionType.READ);
 
     public static final HealthPermissionManager.PermissionKey SLEEP_PERMISSION = new HealthPermissionManager.PermissionKey(
-            "com.samsung.health.sleep", HealthPermissionManager.PermissionType.READ);
+            HealthConstants.Sleep.HEALTH_DATA_TYPE, HealthPermissionManager.PermissionType.READ);
 
     public static final HealthPermissionManager.PermissionKey WATER_DRINK_PERMISSIONS = new HealthPermissionManager.PermissionKey(
-            "com.samsung.health.water_intake", HealthPermissionManager.PermissionType.READ);
+            HealthConstants.WaterIntake.HEALTH_DATA_TYPE, HealthPermissionManager.PermissionType.READ);
 
 
-    private StepCountReporter mStepCountReporter;
+//    private StepCountReporter mStepCountReporter;
     private SwimmingReporter mExerciseReporter;
     private SleepReporter mSleepReporter;
     private WaterDrinkReport mWaterDrinkReport;
@@ -72,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
     // TODO: 20-11-2019 Samsung Health App Related stuff by Sakib END
 
 
+    private StepCountReportNew stepCountReportNew;
+    private SwimmingReportNew swimmingReportNew;
+    private DrinkWaterReport drinkWaterReport;
+    private SleeepReportNew sleeepReportNew;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,15 +98,28 @@ public class MainActivity extends AppCompatActivity {
         mStore.connectService();
     }
 
+    @Override
+    public void onDestroy() {
+        mStore.disconnectService();
+        super.onDestroy();
+    }
+
     // TODO: 20-11-2019 Samsung Health Related stuff by Sakib START
     private final HealthDataStore.ConnectionListener mConnectionListener = new HealthDataStore.ConnectionListener() {
         @Override
         public void onConnected() {
             mIsStoreConnected = true;
-            mStepCountReporter = new StepCountReporter(mStore);
+//            mStepCountReporter = new StepCountReporter(mStore);
             mExerciseReporter = new SwimmingReporter(mStore);
             mSleepReporter = new SleepReporter(mStore);
             mWaterDrinkReport = new WaterDrinkReport(mStore);
+
+            //Report new data
+            stepCountReportNew = new StepCountReportNew(mStore);
+            swimmingReportNew = new SwimmingReportNew(mStore);
+            drinkWaterReport = new DrinkWaterReport(mStore);
+            sleeepReportNew = new SleeepReportNew(mStore);
+
 
             if (isPermissionAcquired()) {
                 synchHealthAppData();
@@ -246,7 +269,12 @@ public class MainActivity extends AppCompatActivity {
             List<Date> listDates = GlobalMethods.getBetweenDates(strLastSyncDate, GlobalMethods.getCurrentDate());
             for (Date date : listDates) {
                 String strDate = GlobalMethods.mmddyyFormat.format(date);
-                mStepCountReporter.getTodayStepSummary(getStepCountSummury, strDate);
+//                mStepCountReporter.getTodayStepSummary(getStepCountSummury, strDate);
+
+//                stepCountReportNew.start(mStepCountObserver,strDate);
+//                swimmingReportNew.start(swimObserver,strDate);
+//                drinkWaterReport.start(drinkWaterObserver,strDate);
+                sleeepReportNew.start(sleepObserver,strDate);
             }
 
             Handler handler = new Handler();
@@ -265,5 +293,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     // TODO: 20-11-2019 Samsung Health Related stuff by Sakib END
+
+    private StepCountReportNew.StepCountObserver mStepCountObserver = (count,distance,date )-> {
+        Log.d("=> ", "Step reported : " + count + " date ->"+ date +", Distance " + distance);
+    };
+
+    private SwimmingReportNew.SwimObserver swimObserver = (int distance, String date) ->{
+        Log.d("=> ", "Swimming reported : Date " +date + ", Distance " +distance);
+    };
+
+    private DrinkWaterReport.DrinkWaterObserver drinkWaterObserver = (drinkAmount,date)-> {
+        Log.d("=> ", "Drink water reported : Date " +date + ", drinkAmount " + drinkAmount);
+    };
+
+    private SleeepReportNew.SleepObserver sleepObserver = (totalSleepMinute , date)->{
+        Log.d("=> ", "Sleep reported : Date " +date + ", sleepData " + totalSleepMinute);
+    };
 
 }

@@ -48,7 +48,7 @@ public class StepCountReporter {
 
         HealthDataResolver.ReadRequest request = new ReadRequest.Builder()
                 .setDataType("com.samsung.shealth.step_daily_trend")
-                .setProperties(new String[] {"count", "binning_data","distance"})
+                .setProperties(new String[] {"count", "binning_data","                                                          "})
                 .setFilter(filter)
                 .build();
 

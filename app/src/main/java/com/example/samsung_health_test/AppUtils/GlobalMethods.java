@@ -19,6 +19,7 @@ import java.util.TimeZone;
 public class GlobalMethods {
 
     public static SimpleDateFormat mmddyyFormat = new SimpleDateFormat("MM/dd/yy");
+    public static String formateWithHourMinute = "MM/dd/yyyy hh:mm";
 
     public static long getEpochTime(String myDate) {
         Calendar cal = Calendar.getInstance();
@@ -45,6 +46,13 @@ public class GlobalMethods {
         return cal.getTimeInMillis();
     }
 
+    public static String getFormatedTimeFromDate(Date date){
+        SimpleDateFormat formatedDate = new SimpleDateFormat(formateWithHourMinute);
+        formatedDate.format(date);
+        String formattedDate = formatedDate.format(date);
+        return formattedDate;
+    }
+
     public static String getDiffMinute(Date startDate, Date endDate) {
         //For Reference check below URL
         //https://crunchify.com/how-to-calculate-the-difference-between-two-java-date-instances/
@@ -67,6 +75,13 @@ public class GlobalMethods {
     public static double meterToMile(double data) {
         return data * 0.00062137119;
     }
+
+    public static double miliLiterToOZ(double mlValue){
+        return mlValue * 0.033814;
+    }
+
+
+
 
     public static void showConfirmAlert(Context context, String msg, DialogInterface.OnClickListener onYesClick) {
         new AlertDialog.Builder(context).setIcon(0).setTitle(context.getString(R.string.app_name)).setMessage(msg).setCancelable(true).setNegativeButton("NO", null)
