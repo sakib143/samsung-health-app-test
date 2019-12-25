@@ -10,12 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.samsung_health_test.AppUtils.GlobalMethods;
 import com.example.samsung_health_test.samsung_health.NewData.DrinkWaterReport;
 import com.example.samsung_health_test.samsung_health.NewData.SleeepReportNew;
-import com.example.samsung_health_test.samsung_health.SleepReporter;
 import com.example.samsung_health_test.samsung_health.NewData.StepCountReportNew;
-import com.example.samsung_health_test.samsung_health.StepCountReporter;
 import com.example.samsung_health_test.samsung_health.NewData.SwimmingReportNew;
-import com.example.samsung_health_test.samsung_health.SwimmingReporter;
-import com.example.samsung_health_test.samsung_health.WaterDrinkReport;
 import com.samsung.android.sdk.healthdata.HealthConnectionErrorResult;
 import com.samsung.android.sdk.healthdata.HealthConstants;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
@@ -48,10 +44,6 @@ public class MainActivity extends AppCompatActivity {
             HealthConstants.WaterIntake.HEALTH_DATA_TYPE, HealthPermissionManager.PermissionType.READ);
 
 
-//    private StepCountReporter mStepCountReporter;
-    private SwimmingReporter mExerciseReporter;
-    private SleepReporter mSleepReporter;
-    private WaterDrinkReport mWaterDrinkReport;
     private HealthDataStore mStore;
     private boolean mIsStoreConnected;
     private Set<HealthPermissionManager.PermissionKey> mKeys = new HashSet<>();
@@ -68,18 +60,11 @@ public class MainActivity extends AppCompatActivity {
     private JSONArray arrayLastData;
     private JSONObject objHealthData;
 
-    private SleepReporter.GetSleepSummury getSleepSummury;
-    private SwimmingReporter.GetSwimmingSummury getSwimmingSummury;
-    private StepCountReporter.GetStepCountSummury getStepCountSummury;
-    private WaterDrinkReport.GetWaterDrinkSummury getWaterDrinkSummury;
-
-    // TODO: 20-11-2019 Samsung Health App Related stuff by Sakib END
-
-
     private StepCountReportNew stepCountReportNew;
     private SwimmingReportNew swimmingReportNew;
     private DrinkWaterReport drinkWaterReport;
     private SleeepReportNew sleeepReportNew;
+    // TODO: 20-11-2019 Samsung Health App Related stuff by Sakib END
 
 
     @Override
@@ -100,8 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        mStore.disconnectService();
         super.onDestroy();
+        mStore.disconnectService();
     }
 
     // TODO: 20-11-2019 Samsung Health Related stuff by Sakib START
@@ -109,18 +94,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onConnected() {
             mIsStoreConnected = true;
-//            mStepCountReporter = new StepCountReporter(mStore);
-            mExerciseReporter = new SwimmingReporter(mStore);
-            mSleepReporter = new SleepReporter(mStore);
-            mWaterDrinkReport = new WaterDrinkReport(mStore);
-
-            //Report new data
             stepCountReportNew = new StepCountReportNew(mStore);
             swimmingReportNew = new SwimmingReportNew(mStore);
             drinkWaterReport = new DrinkWaterReport(mStore);
             sleeepReportNew = new SleeepReportNew(mStore);
-
-
             if (isPermissionAcquired()) {
                 synchHealthAppData();
             } else {
@@ -229,52 +206,14 @@ public class MainActivity extends AppCompatActivity {
             Calendar end = Calendar.getInstance();
             end.setTime(endDate);
 
-            getSleepSummury = (totalSleepTime, mJsonObject) -> {
-                try {
-                    JSONObject jsonObject = mJsonObject;
-                    jsonObject.put("sleep_minute", totalSleepTime);
-                    arrayLastData.put(jsonObject);
-                    objLastSychHealthData.put("array", arrayLastData);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            };
-
-            getWaterDrinkSummury = new WaterDrinkReport.GetWaterDrinkSummury() {
-                @Override
-                public void getWaterDrinkData(double waterData, String date, JSONObject objHealthData) throws JSONException {
-                    JSONObject waterParam = objHealthData;
-                    waterParam.put("water", waterData);
-                    mSleepReporter.getTodaySleepData(getSleepSummury, date, waterParam);
-                }
-            };
-
-            getSwimmingSummury = (distance, date, objHealthData) -> {
-                JSONObject jsonObject = objHealthData;
-                jsonObject.put("swim_distance", GlobalMethods.meterToMile(distance));
-                mWaterDrinkReport.getDrinkData(getWaterDrinkSummury,GlobalMethods.getCurrentDate(),jsonObject);
-            };
-
-            getStepCountSummury = (totalCount, distance, date) -> {
-                arrayLastData = new JSONArray();
-                objLastSychHealthData = new JSONObject();
-                objHealthData = new JSONObject();
-                objHealthData.put("step_distance", GlobalMethods.meterToMile(distance));
-                objHealthData.put("step_count", totalCount);
-                objHealthData.put("date", date);
-
-                mExerciseReporter.getTodayExerciseData(getSwimmingSummury, date, objHealthData);
-            };
 
             List<Date> listDates = GlobalMethods.getBetweenDates(strLastSyncDate, GlobalMethods.getCurrentDate());
             for (Date date : listDates) {
                 String strDate = GlobalMethods.mmddyyFormat.format(date);
-//                mStepCountReporter.getTodayStepSummary(getStepCountSummury, strDate);
-
-//                stepCountReportNew.start(mStepCountObserver,strDate);
-//                swimmingReportNew.start(swimObserver,strDate);
-//                drinkWaterReport.start(drinkWaterObserver,strDate);
-                sleeepReportNew.start(sleepObserver,strDate);
+                arrayLastData = new JSONArray();
+                objLastSychHealthData = new JSONObject();
+                objHealthData = new JSONObject();
+                swimmingReportNew.start(swimObserver,strDate,objHealthData);
             }
 
             Handler handler = new Handler();
@@ -286,28 +225,56 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("=>"," Sync data ==> " + objLastSychHealthData);
                 }
             }, 5000);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     // TODO: 20-11-2019 Samsung Health Related stuff by Sakib END
 
-    private StepCountReportNew.StepCountObserver mStepCountObserver = (count,distance,date )-> {
-        Log.d("=> ", "Step reported : " + count + " date ->"+ date +", Distance " + distance);
+    private DrinkWaterReport.DrinkWaterObserver drinkWaterObserver = (drinkAmount,date,inputParam)-> {
+        try {
+            Log.d("=> ", "Drink water reported : Date " +date + ", drinkAmount " + drinkAmount);
+            inputParam.put("waterQuantity ", drinkAmount);
+            inputParam.put("activityDate", date);
+            arrayLastData.put(inputParam);
+            objLastSychHealthData.put("array", arrayLastData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     };
 
-    private SwimmingReportNew.SwimObserver swimObserver = (int distance, String date) ->{
-        Log.d("=> ", "Swimming reported : Date " +date + ", Distance " +distance);
+    private SleeepReportNew.SleepObserver sleepObserver = (totalSleepMinute , date,inputParam)->{
+        try {
+            Log.d("=> ", "Sleep reported : Date " +date + ", sleepData " + totalSleepMinute);
+            inputParam.put("sleepMinutes", totalSleepMinute);
+            inputParam.put("activityDate", date);
+            drinkWaterReport.start(drinkWaterObserver,date,inputParam);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     };
 
-    private DrinkWaterReport.DrinkWaterObserver drinkWaterObserver = (drinkAmount,date)-> {
-        Log.d("=> ", "Drink water reported : Date " +date + ", drinkAmount " + drinkAmount);
+    private StepCountReportNew.StepCountObserver mStepCountObserver = (count,distance,date,inputParam)-> {
+        try {
+            Log.d("=> ", "Step reported : " + count + " date ->"+ date +", Distance " + distance);
+            inputParam.put("steps", count);
+            inputParam.put("stepsDistance", distance);
+            inputParam.put("activityDate", date);
+
+            sleeepReportNew.start(sleepObserver,date,inputParam);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     };
 
-    private SleeepReportNew.SleepObserver sleepObserver = (totalSleepMinute , date)->{
-        Log.d("=> ", "Sleep reported : Date " +date + ", sleepData " + totalSleepMinute);
+    private SwimmingReportNew.SwimObserver swimObserver = (distance, date,inputParam) ->{
+        try {
+            Log.d("=> ", "Swimming reported : Date " +date + ", Distance " +distance);
+            inputParam.put("swimDistance", distance);
+            inputParam.put("activityDate", date);
+            stepCountReportNew.start(mStepCountObserver,date,inputParam);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     };
-
 }

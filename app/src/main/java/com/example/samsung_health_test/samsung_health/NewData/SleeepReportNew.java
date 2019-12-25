@@ -9,6 +9,8 @@ import com.samsung.android.sdk.healthdata.HealthDataObserver;
 import com.samsung.android.sdk.healthdata.HealthDataResolver;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
 
+import org.json.JSONObject;
+
 import java.util.Date;
 
 public class SleeepReportNew {
@@ -21,18 +23,18 @@ public class SleeepReportNew {
         this.mStore = mStore;
     }
 
-    public void start(SleepObserver sleepObserver, String strDate) {
+    public void start(SleepObserver sleepObserver, String strDate, JSONObject jsonObject) {
         this.sleepObserver = sleepObserver;
         HealthDataObserver.addObserver(mStore, HealthConstants.Sleep.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
             @Override
             public void onChange(String s) {
-                readTodayStepCount(strDate);
+                readTodayStepCount(strDate,jsonObject);
             }
         });
-        readTodayStepCount(strDate);
+        readTodayStepCount(strDate,jsonObject);
     }
 
-    private void readTodayStepCount(String strDate) {
+    private void readTodayStepCount(String strDate,JSONObject jsonObject) {
         HealthDataResolver resolver = new HealthDataResolver(mStore, null);
         long startTime = GlobalMethods.getEpochTime(strDate);
         long endTime = startTime + ONE_DAY_IN_MILLIS;
@@ -59,7 +61,7 @@ public class SleeepReportNew {
                     result.close();
                 }
                 if (sleepObserver != null) {
-                    sleepObserver.onChanged(totalSleepMinute, strDate);
+                    sleepObserver.onChanged(totalSleepMinute, strDate,jsonObject);
                 }
             });
         } catch (Exception e) {
@@ -68,6 +70,6 @@ public class SleeepReportNew {
     }
 
     public interface SleepObserver {
-        void onChanged(String totalSleepMinute, String date);
+        void onChanged(String totalSleepMinute, String date, JSONObject jsonObject);
     }
 }

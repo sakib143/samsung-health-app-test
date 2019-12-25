@@ -2,36 +2,46 @@ package com.example.samsung_health_test.samsung_health.NewData;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+
 import com.example.samsung_health_test.AppUtils.GlobalMethods;
 import com.samsung.android.sdk.healthdata.HealthConstants;
 import com.samsung.android.sdk.healthdata.HealthData;
 import com.samsung.android.sdk.healthdata.HealthDataObserver;
 import com.samsung.android.sdk.healthdata.HealthDataResolver;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
+import com.samsung.android.sdk.healthdata.HealthDataUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class SwimmingReportNew {
 
     private final HealthDataStore mStore;
     private SwimObserver swimObserver;
     private static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000L;
+    private String swim = "140001";
 
     public SwimmingReportNew(HealthDataStore store) {
         mStore = store;
     }
 
-    public void start(SwimObserver listener, String strDate) {
+    public void start(SwimObserver listener, String strDate, JSONObject jsonObject) {
         swimObserver = listener;
         HealthDataObserver.addObserver(mStore, HealthConstants.Exercise.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
             @Override
             public void onChange(String s) {
-                readTodaySwimData(strDate);
+                readTodaySwimData(strDate,jsonObject);
             }
         });
 
-        readTodaySwimData(strDate);
+        readTodaySwimData(strDate,jsonObject);
     }
 
-    private void readTodaySwimData(String strDate) {
+    private void readTodaySwimData(String strDate,JSONObject jsonObject) {
         HealthDataResolver resolver = new HealthDataResolver(mStore, null);
         long startTime = GlobalMethods.getEpochTime(strDate);
         long endTime = startTime + ONE_DAY_IN_MILLIS;
@@ -45,16 +55,16 @@ public class SwimmingReportNew {
 
         try {
             resolver.read(request).setResultListener(result ->{
-                int distance = 0;
+                String distance = "";
                 try {
                     for (HealthData data : result) {
-                        distance += data.getFloat(HealthConstants.Exercise.DISTANCE);
+                        distance += data.getString(swim);
                     }
                 } finally {
                     result.close();
                 }
                 if (swimObserver != null) {
-                    swimObserver.onChanged(distance,strDate);
+                    swimObserver.onChanged(distance,strDate,jsonObject);
                 }
             });
         } catch (Exception e) {
@@ -63,7 +73,7 @@ public class SwimmingReportNew {
     }
 
     public interface SwimObserver {
-        void onChanged(int distance, String date);
+        void onChanged(String distance, String date, JSONObject jsonObject);
     }
 
 }

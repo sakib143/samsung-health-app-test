@@ -9,6 +9,8 @@ import com.samsung.android.sdk.healthdata.HealthDataObserver;
 import com.samsung.android.sdk.healthdata.HealthDataResolver;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
 
+import org.json.JSONObject;
+
 public class StepCountReportNew {
 
     private final HealthDataStore mStore;
@@ -19,18 +21,18 @@ public class StepCountReportNew {
         mStore = store;
     }
 
-    public void start(StepCountObserver listener, String strDate) {
+    public void start(StepCountObserver listener, String strDate, JSONObject jsonObject) {
         mStepCountObserver = listener;
         HealthDataObserver.addObserver(mStore, HealthConstants.StepCount.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
             @Override
             public void onChange(String s) {
-                readTodayStepCount(strDate);
+                readTodayStepCount(strDate,jsonObject);
             }
         });
-        readTodayStepCount(strDate);
+        readTodayStepCount(strDate,jsonObject);
     }
 
-    private void readTodayStepCount(String strDate) {
+    private void readTodayStepCount(String strDate, JSONObject jsonObject) {
         HealthDataResolver resolver = new HealthDataResolver(mStore, null);
         long startTime = GlobalMethods.getEpochTime(strDate);
         long endTime = startTime + ONE_DAY_IN_MILLIS;
@@ -55,7 +57,7 @@ public class StepCountReportNew {
                     result.close();
                 }
                 if (mStepCountObserver != null) {
-                    mStepCountObserver.onChanged(count,distance,strDate);
+                    mStepCountObserver.onChanged(count,distance,strDate,jsonObject);
                 }
             });
         } catch (Exception e) {
@@ -64,6 +66,6 @@ public class StepCountReportNew {
     }
 
     public interface StepCountObserver {
-        void onChanged(int count, int distance, String date);
+        void onChanged(int count, int distance, String date, JSONObject jsonObject);
     }
 }

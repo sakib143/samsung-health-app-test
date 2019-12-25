@@ -9,6 +9,8 @@ import com.samsung.android.sdk.healthdata.HealthDataObserver;
 import com.samsung.android.sdk.healthdata.HealthDataResolver;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
 
+import org.json.JSONObject;
+
 public class DrinkWaterReport {
 
     private final HealthDataStore mStore;
@@ -19,18 +21,18 @@ public class DrinkWaterReport {
         mStore = store;
     }
 
-    public void start(DrinkWaterObserver listener, String strDate) {
+    public void start(DrinkWaterObserver listener, String strDate,JSONObject jsonObject) {
         drinkWaterObserver = listener;
         HealthDataObserver.addObserver(mStore, HealthConstants.StepCount.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
             @Override
             public void onChange(String s) {
-                readTodayStepCount(strDate);
+                readTodayStepCount(strDate,jsonObject);
             }
         });
-        readTodayStepCount(strDate);
+        readTodayStepCount(strDate,jsonObject);
     }
 
-    private void readTodayStepCount(String strDate) {
+    private void readTodayStepCount(String strDate,JSONObject jsonObject) {
         HealthDataResolver resolver = new HealthDataResolver(mStore, null);
         long startTime = GlobalMethods.getEpochTime(strDate);
         long endTime = startTime + ONE_DAY_IN_MILLIS;
@@ -53,7 +55,7 @@ public class DrinkWaterReport {
                     result.close();
                 }
                 if (drinkWaterObserver != null) {
-                    drinkWaterObserver.onChanged(waterAmount,strDate);
+                    drinkWaterObserver.onChanged(waterAmount,strDate,jsonObject);
                 }
             });
         } catch (Exception e) {
@@ -62,7 +64,7 @@ public class DrinkWaterReport {
     }
 
     public interface DrinkWaterObserver {
-        void onChanged(double drinkAmount, String date);
+        void onChanged(double drinkAmount, String date, JSONObject jsonObject);
     }
 
 }
