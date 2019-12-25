@@ -260,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
             inputParam.put("steps", count);
             inputParam.put("stepsDistance", distance);
             inputParam.put("activityDate", date);
-
             sleeepReportNew.start(sleepObserver,date,inputParam);
         } catch (Exception e) {
             e.printStackTrace();
