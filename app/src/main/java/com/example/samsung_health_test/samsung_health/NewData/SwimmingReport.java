@@ -58,7 +58,7 @@ public class SwimmingReport {
                 double distance = 0.0;
                 try {
                     for (HealthData data : result) {
-                        distance += data.getFloat("swim");
+                        distance += data.getFloat(HealthConstants.Exercise.DISTANCE);
                     }
                 } finally {
                     result.close();
