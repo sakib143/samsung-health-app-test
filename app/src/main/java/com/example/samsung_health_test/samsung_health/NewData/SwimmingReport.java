@@ -48,7 +48,7 @@ public class SwimmingReport {
 
         HealthDataResolver.ReadRequest request = new HealthDataResolver.ReadRequest.Builder()
                 .setDataType(HealthConstants.Exercise.HEALTH_DATA_TYPE)
-                .setProperties(new String[]{HealthConstants.Exercise.EXERCISE_CUSTOM_TYPE})
+                .setProperties(new String[]{HealthConstants.Exercise.EXERCISE_TYPE})
                 .setLocalTimeRange(HealthConstants.Exercise.START_TIME, HealthConstants.Exercise.TIME_OFFSET,
                         startTime, endTime)
                 .build();
