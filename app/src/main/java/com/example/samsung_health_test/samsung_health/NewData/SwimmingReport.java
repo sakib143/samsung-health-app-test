@@ -23,7 +23,6 @@ public class SwimmingReport {
     private final HealthDataStore mStore;
     private SwimObserver swimObserver;
     private static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000L;
-    private String SWIM = "140001";
 
     public SwimmingReport(HealthDataStore store) {
         mStore = store;
