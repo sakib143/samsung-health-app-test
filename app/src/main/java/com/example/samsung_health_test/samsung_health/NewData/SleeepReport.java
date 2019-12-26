@@ -13,13 +13,13 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
-public class SleeepReportNew {
+public class SleeepReport {
 
     private final HealthDataStore mStore;
     private SleepObserver sleepObserver;
     private static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000L;
 
-    public SleeepReportNew(HealthDataStore mStore) {
+    public SleeepReport(HealthDataStore mStore) {
         this.mStore = mStore;
     }
 

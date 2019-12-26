@@ -2,69 +2,62 @@ package com.example.samsung_health_test.samsung_health.NewData;
 
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
-
 import com.example.samsung_health_test.AppUtils.GlobalMethods;
 import com.samsung.android.sdk.healthdata.HealthConstants;
 import com.samsung.android.sdk.healthdata.HealthData;
 import com.samsung.android.sdk.healthdata.HealthDataObserver;
 import com.samsung.android.sdk.healthdata.HealthDataResolver;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
-import com.samsung.android.sdk.healthdata.HealthDataUtil;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-import java.util.List;
-
-public class SwimmingReportNew {
+public class StepCountReport {
 
     private final HealthDataStore mStore;
-    private SwimObserver swimObserver;
+    private StepCountObserver mStepCountObserver;
     private static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000L;
-    private String swim = "140001";
 
-    public SwimmingReportNew(HealthDataStore store) {
+    public StepCountReport(HealthDataStore store) {
         mStore = store;
     }
 
-    public void start(SwimObserver listener, String strDate, JSONObject jsonObject) {
-        swimObserver = listener;
-        HealthDataObserver.addObserver(mStore, HealthConstants.Exercise.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
+    public void start(StepCountObserver listener, String strDate, JSONObject jsonObject) {
+        mStepCountObserver = listener;
+        HealthDataObserver.addObserver(mStore, HealthConstants.StepCount.HEALTH_DATA_TYPE, new HealthDataObserver(null) {
             @Override
             public void onChange(String s) {
-                readTodaySwimData(strDate,jsonObject);
+                readTodayStepCount(strDate,jsonObject);
             }
         });
-
-        readTodaySwimData(strDate,jsonObject);
+        readTodayStepCount(strDate,jsonObject);
     }
 
-    private void readTodaySwimData(String strDate,JSONObject jsonObject) {
+    private void readTodayStepCount(String strDate, JSONObject jsonObject) {
         HealthDataResolver resolver = new HealthDataResolver(mStore, null);
         long startTime = GlobalMethods.getEpochTime(strDate);
         long endTime = startTime + ONE_DAY_IN_MILLIS;
 
         HealthDataResolver.ReadRequest request = new HealthDataResolver.ReadRequest.Builder()
-                .setDataType(HealthConstants.Exercise.HEALTH_DATA_TYPE)
-                .setProperties(new String[]{HealthConstants.Exercise.ADDITIONAL,HealthConstants.Exercise.DISTANCE})
-                .setLocalTimeRange(HealthConstants.Exercise.START_TIME, HealthConstants.Exercise.TIME_OFFSET,
+                .setDataType(HealthConstants.StepCount.HEALTH_DATA_TYPE)
+                .setProperties(new String[]{HealthConstants.StepCount.COUNT,HealthConstants.StepCount.DISTANCE})
+                .setLocalTimeRange(HealthConstants.StepCount.START_TIME, HealthConstants.StepCount.TIME_OFFSET,
                         startTime, endTime)
                 .build();
 
         try {
             resolver.read(request).setResultListener(result ->{
-                String distance = "";
+                int count = 0;
+                int distance = 0;
                 try {
                     for (HealthData data : result) {
-                        distance += data.getString(swim);
+                        count += data.getInt(HealthConstants.StepCount.COUNT);
+                        distance += data.getInt(HealthConstants.StepCount.DISTANCE);
                     }
                 } finally {
                     result.close();
                 }
-                if (swimObserver != null) {
-                    swimObserver.onChanged(distance,strDate,jsonObject);
+                if (mStepCountObserver != null) {
+                    mStepCountObserver.onChanged(count,distance,strDate,jsonObject);
                 }
             });
         } catch (Exception e) {
@@ -72,8 +65,7 @@ public class SwimmingReportNew {
         }
     }
 
-    public interface SwimObserver {
-        void onChanged(String distance, String date, JSONObject jsonObject);
+    public interface StepCountObserver {
+        void onChanged(int count, int distance, String date, JSONObject jsonObject);
     }
-
 }

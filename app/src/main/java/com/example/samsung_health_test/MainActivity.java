@@ -9,9 +9,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.samsung_health_test.AppUtils.GlobalMethods;
 import com.example.samsung_health_test.samsung_health.NewData.DrinkWaterReport;
-import com.example.samsung_health_test.samsung_health.NewData.SleeepReportNew;
-import com.example.samsung_health_test.samsung_health.NewData.StepCountReportNew;
-import com.example.samsung_health_test.samsung_health.NewData.SwimmingReportNew;
+import com.example.samsung_health_test.samsung_health.NewData.SleeepReport;
+import com.example.samsung_health_test.samsung_health.NewData.StepCountReport;
+import com.example.samsung_health_test.samsung_health.NewData.SwimmingReport;
 import com.samsung.android.sdk.healthdata.HealthConnectionErrorResult;
 import com.samsung.android.sdk.healthdata.HealthConstants;
 import com.samsung.android.sdk.healthdata.HealthDataStore;
@@ -60,10 +60,10 @@ public class MainActivity extends AppCompatActivity {
     private JSONArray arrayLastData;
     private JSONObject objHealthData;
 
-    private StepCountReportNew stepCountReportNew;
-    private SwimmingReportNew swimmingReportNew;
+    private StepCountReport stepCountReportNew;
+    private SwimmingReport swimmingReportNew;
     private DrinkWaterReport drinkWaterReport;
-    private SleeepReportNew sleeepReportNew;
+    private SleeepReport sleeepReportNew;
     // TODO: 20-11-2019 Samsung Health App Related stuff by Sakib END
 
 
@@ -94,10 +94,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onConnected() {
             mIsStoreConnected = true;
-            stepCountReportNew = new StepCountReportNew(mStore);
-            swimmingReportNew = new SwimmingReportNew(mStore);
+            stepCountReportNew = new StepCountReport(mStore);
+            swimmingReportNew = new SwimmingReport(mStore);
             drinkWaterReport = new DrinkWaterReport(mStore);
-            sleeepReportNew = new SleeepReportNew(mStore);
+            sleeepReportNew = new SleeepReport(mStore);
             if (isPermissionAcquired()) {
                 synchHealthAppData();
             } else {
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private SleeepReportNew.SleepObserver sleepObserver = (totalSleepMinute , date,inputParam)->{
+    private SleeepReport.SleepObserver sleepObserver = (totalSleepMinute , date, inputParam)->{
         try {
             Log.d("=> ", "Sleep reported : Date " +date + ", sleepData " + totalSleepMinute);
             inputParam.put("sleepMinutes", totalSleepMinute);
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private StepCountReportNew.StepCountObserver mStepCountObserver = (count,distance,date,inputParam)-> {
+    private StepCountReport.StepCountObserver mStepCountObserver = (count, distance, date, inputParam)-> {
         try {
             Log.d("=> ", "Step reported : " + count + " date ->"+ date +", Distance " + distance);
             inputParam.put("steps", count);
@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private SwimmingReportNew.SwimObserver swimObserver = (distance, date,inputParam) ->{
+    private SwimmingReport.SwimObserver swimObserver = (distance, date, inputParam) ->{
         try {
             Log.d("=> ", "Swimming reported : Date " +date + ", Distance " +distance);
             inputParam.put("swimDistance", distance);
